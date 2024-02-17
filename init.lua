@@ -15,7 +15,7 @@ local function Create(name: string, isAbstract: boolean?)
 			return name
 		end,
 		
-		__index = function(class, index)
+		__index = function(_, index)
 			assert(index ~= "new", "Abstract class cannot create instances")
 		end,
 	})
