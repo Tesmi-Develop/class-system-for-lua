@@ -59,7 +59,7 @@ local function Create(name: string, isAbstract: boolean?)
 	
 	function newClass:__constructor(...)
 		if newClass.super then
-			newClass.super.constructor(self, ...)
+			newClass.super.__constructor(self, ...)
 		end
 		
 		return newClass.constructor(self, ...)
