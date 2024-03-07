@@ -1,7 +1,9 @@
 [package]
 name = "tesmi-develop/class-system"
-version = "0.0.2"
+version = "1.0.2"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
+exclude = ["test", ".gitignore"]
 
 [dependencies]
+signal = "sleitnick/signal@2.0.1"

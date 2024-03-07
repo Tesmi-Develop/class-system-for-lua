@@ -1,0 +1,32 @@
+{
+  "name": "class-system-for-lua",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "Shared": {
+        "$path": "test/shared"
+      },
+      "Packages": {
+        "$path": "Packages"
+      },
+      "Library": {
+        "$path": "src"
+      }
+    },
+
+    "ServerScriptService": {
+      "Server": {
+        "$path": "test/server"
+      }
+    },
+
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "Client": {
+          "$path": "test/client"
+        }
+      }
+    }
+  }
+}
