@@ -1,0 +1,30 @@
+{
+	"name": "class-system-test",
+	"tree": {
+		"$className": "DataModel",
+		"ReplicatedStorage": {
+			"$className": "ReplicatedStorage",
+			"Class-system": {
+				"$path": "src"
+			},
+			"Test": {
+				"$path": "test/shared"
+			}
+		},
+		"ServerScriptService": {
+			"$className": "ServerScriptService",
+			"Test": {
+				"$path": "test/server"
+			}
+		},
+		"StarterPlayer": {
+			"$className": "StarterPlayer",
+			"StarterPlayerScripts": {
+				"$className": "StarterPlayerScripts",
+				"Test": {
+					"$path": "test/client"
+				}
+			}
+		}
+	}
+}

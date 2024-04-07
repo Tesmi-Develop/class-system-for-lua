@@ -1,5 +1,4 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Signal = require(ReplicatedStorage.Packages.signal)
+local Signal = require(script.Parent.signal)
 
 local CreateGeneratorId = function(isString)
 	if isString == nil then

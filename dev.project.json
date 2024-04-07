@@ -1,0 +1,12 @@
+{
+  "name": "class-system-dev",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "Class-system": {
+        "$path": "src"
+      }
+    }
+  }
+}

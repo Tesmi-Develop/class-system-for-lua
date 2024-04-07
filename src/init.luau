@@ -4,17 +4,53 @@ local types = require(script.types);
 local metadatas = {}
 local classesByMetadata = {}
 
-type Options = {
-	isAbstract: boolean | nil;
+type OptionsWithoutIsAbstract = {
 	isTrackedClass: boolean | nil;
 }
 
+type Options = {
+	isAbstract: boolean | nil;
+} & OptionsWithoutIsAbstract
+
 local validateLabel = "__validateLabel"
+
+export type Class<Methods, Implementation, StaticProps, InitArguments...> = {
+	constructor: (self: Implementation & Methods, InitArguments...) -> (),
+	new: (InitArguments...) -> Implementation & Methods,
+} & Methods & StaticProps;
+
+export type ExtendedClass<Superior, Methods, Implementation, StaticProps, InitArguments...> = 
+Class<Methods, Implementation & {super: Superior}, StaticProps, InitArguments...>
+
+local GlobalTemplateSettings = {
+	IsEnableTracking = false;
+}
+
+local GlobalSettings = table.clone(GlobalTemplateSettings)
+
+local function validateSettings(settings)
+	for key, value in GlobalTemplateSettings do
+		local valueType = typeof(value)
+
+		if typeof(settings[key]) ~= valueType then
+			error(`Invalid global settings: ${key}, "expected:", ${valueType}, "actual:", ${typeof(settings[key])}`)
+		end
+	end
+end
+
+local function SetGlobalSettings(settings: typeof(GlobalSettings))
+	validateSettings(settings)
+	GlobalSettings = table.clone(settings)
+end
+
+local function GetGlobalSettings()
+	return table.clone(GlobalSettings)
+end
 
 local function Create(name: string, options: Options?)
 	options = options or {}
 	local isAbstract = options.isAbstract or false
-	local isTrackedClass = options.isTrackedClass or true
+	local isTrackedClass = options.isTrackedClass or GlobalSettings.IsEnableTracking
 
 	assert(typeof(name) == "string", "Invalid name")
 
@@ -88,8 +124,7 @@ local function Create(name: string, options: Options?)
 		})
 	end
 
-	function newClass:extends(parent)
-		assert(self == newClass, "This method is available only from class")
+	function newClass.extends(parent)
 		assert(rawget(newClass, "super") == nil, "Attempt to inherit a class twice")
 
 		local mt = getmetatable(newClass)
@@ -109,10 +144,10 @@ local function Create(name: string, options: Options?)
 		newClass.constructor(self, ...)
 
 		if newClass.super then
-			assert(self[validateLabel], `{newClass} extends {newClass.super}, but the parent's constructor was not invoked`)
+			assert(rawget(self, validateLabel), `{newClass} extends {newClass.super}, but the parent's constructor was not invoked`)
 		end
 
-		self[validateLabel] = nil
+		rawset(self, validateLabel, nil)
 
 		if isSendValidateLabel then
 			self[validateLabel] = true
@@ -126,6 +161,12 @@ local function Create(name: string, options: Options?)
 	end
 
 	return newClass
+end
+
+local function CreateAbstruct(name: string, options: OptionsWithoutIsAbstract?)
+	options = options or {}
+	options.isAbstract = true
+	return Create(name, options)
 end
 
 local function instanceof(obj, class)
@@ -185,7 +226,12 @@ end
 
 -- API
 return {
+	SetGlobalSettings = SetGlobalSettings;
+	GetGlobalSettings = GetGlobalSettings;
+
 	Create = Create;
+	CreateAbstruct = CreateAbstruct;
+
 	instanceof = instanceof;
 	GetMetadata = getMetadata;
 	GetClassByMetadata = getClassByMetadata;
