@@ -163,7 +163,7 @@ local function Create(name: string, options: Options?)
 	return newClass
 end
 
-local function CreateAbstruct(name: string, options: OptionsWithoutIsAbstract?)
+local function CreateAbstract(name: string, options: OptionsWithoutIsAbstract?)
 	options = options or {}
 	options.isAbstract = true
 	return Create(name, options)
@@ -230,7 +230,7 @@ return {
 	GetGlobalSettings = GetGlobalSettings;
 
 	Create = Create;
-	CreateAbstruct = CreateAbstruct;
+	CreateAbstract = CreateAbstract;
 
 	instanceof = instanceof;
 	GetMetadata = getMetadata;
