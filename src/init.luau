@@ -1,6 +1,5 @@
 local TrackedInstance = require(script.TrackedInstance)
 local TrackingInstanceController = require(script.TrackingInstanceController)
-local types = require(script.types);
 local metadatas = {}
 local classesByMetadata = {}
 
@@ -12,7 +11,10 @@ type Options = {
 	isAbstract: boolean | nil;
 } & OptionsWithoutIsAbstract
 
-local validateLabel = "__validateLabel"
+export type Seriliazed<T> = {
+	data: T;
+	metadata: string;
+}
 
 export type Class<Methods, Implementation, StaticProps, InitArguments...> = {
 	constructor: (self: Implementation & Methods, InitArguments...) -> (),
@@ -64,6 +66,10 @@ local function Create(name: string, options: Options?)
 			return name
 		end,
 
+		__call = function(t, ...)
+			return t.constructor(...)
+		end,
+
 		__index = function(_, index)
 			assert(index ~= "new", "Abstract class cannot create instances")
 		end,
@@ -89,7 +95,7 @@ local function Create(name: string, options: Options?)
 				TrackedInstance(self)
 			end
 
-			return self:__constructor(false, ...) or self
+			return rawget(newClass, "constructor")(self, ...) or self
 		end
 
 		function newClass._fromData(data, ...)
@@ -115,8 +121,7 @@ local function Create(name: string, options: Options?)
 				parent[index] = value
 			end;
 			__call = function (t, ...)
-				local args = {...}
-				parent.__constructor(args[1], true, table.unpack(args, 2))
+				parent.constructor(...)
 			end;
 			__tostring = function()
 				return tostring(parent)
@@ -126,37 +131,14 @@ local function Create(name: string, options: Options?)
 
 	function newClass.extends(parent)
 		assert(rawget(newClass, "super") == nil, "Attempt to inherit a class twice")
-
-		local mt = getmetatable(newClass)
-		newClass.super = CreateSuper(parent)
-
-		local originalIndexCallback = mt.__index
-		mt.__index = function(class, index)
-			originalIndexCallback(class, index)
-
-			return parent[index]
-		end
+		newClass.super = parent
 
 		return newClass
 	end
 
-	function newClass:__constructor(isSendValidateLabel: boolean, ...)
-		newClass.constructor(self, ...)
-
-		if newClass.super then
-			assert(rawget(self, validateLabel), `{newClass} extends {newClass.super}, but the parent's constructor was not invoked`)
-		end
-
-		rawset(self, validateLabel, nil)
-
-		if isSendValidateLabel then
-			self[validateLabel] = true
-		end
-	end
-
 	function newClass:constructor(...)
 		if newClass.super then
-			newClass.super.constructor(self, ...)
+			newClass.super(self, ...)
 		end
 	end
 
@@ -206,7 +188,7 @@ local function getClassByMetadata(metadata)
 	return classesByMetadata[metadata]
 end
 
-local function Serialize<T>(instance: T): types.Seriliazed<T>
+local function Serialize<T>(instance: T): Seriliazed<T>
 	local data = if instance['__TableLink'] ~= nil then table.clone(instance['__TableLink']) else table.clone(instance);
 	setmetatable(data, nil);
 
@@ -216,7 +198,7 @@ local function Serialize<T>(instance: T): types.Seriliazed<T>
 	}
 end
 
-local function Deserialize<T>(serialized: types.Seriliazed<T>): T
+local function Deserialize<T>(serialized: Seriliazed<T>): T
 	local class = getClassByMetadata(serialized.metadata);
 	assert(class ~= nil, "Class not found");
 	assert(class.new ~= nil, "Class is abstract");

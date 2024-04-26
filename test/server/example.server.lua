@@ -20,3 +20,14 @@ function MyClass:constructor(a: string, b: string)
 	self.B = b
 	self.C = "Hi"
 end
+
+print(MyClass.new("Hello", "World"))
+
+local MyClass2 = ClassSystem.Create("MyClass2").extends(MyClass)
+
+function MyClass2:constructor(a: string, b: string)
+    self:super(a, b)
+	self.D = "Hi2"
+end
+
+print(MyClass2.new("Hello", "World")) 
