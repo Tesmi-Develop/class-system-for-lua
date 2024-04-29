@@ -114,22 +114,8 @@ local function Create(name: string, options: Options?)
 		end
 	end
 
-	local function CreateSuper(parent)
-		return setmetatable({}, {
-			__index = parent;
-			__newindex = function (t, index, value)
-				parent[index] = value
-			end;
-			__call = function (t, ...)
-				parent.constructor(...)
-			end;
-			__tostring = function()
-				return tostring(parent)
-			end;
-		})
-	end
-
 	function newClass.extends(parent)
+		assert(parent !== newClass, "Cannot inherit from self")
 		assert(rawget(newClass, "super") == nil, "Attempt to inherit a class twice")
 		newClass.super = parent
 
