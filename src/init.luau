@@ -70,8 +70,11 @@ local function Create(name: string, options: Options?)
 			return t.constructor(...)
 		end,
 
-		__index = function(_, index)
+		__index = function(t, index)
 			assert(index ~= "new", "Abstract class cannot create instances")
+			if t.super then
+				return t.super[index]
+			end
 		end,
 	})
 
@@ -115,7 +118,7 @@ local function Create(name: string, options: Options?)
 	end
 
 	function newClass.extends(parent)
-		assert(parent !== newClass, "Cannot inherit from self")
+		assert(parent ~= newClass, "Cannot inherit from self")
 		assert(rawget(newClass, "super") == nil, "Attempt to inherit a class twice")
 		newClass.super = parent
 
